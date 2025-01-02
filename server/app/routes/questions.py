@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from app.database import get_db
-from app.crud import create_question_answer, get_user_questions, get_question_by_id
+from app.crud import create_question_answer, get_user_questions, get_question_by_id, delete_question_answer, delete_question_by_id
 from app.schemas import QuestionAnswerCreate, QuestionAnswerResponse
 from typing import List
 from openai import OpenAI
@@ -143,3 +143,32 @@ def get_question(
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching question: {str(e)}")
+    
+@router.delete("/{question_id}")
+def delete_question(
+    question_id: str,
+    db: Session = Depends(get_db),
+    authorization: str = Header(...)
+):
+    try:
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization format")
+        token = authorization.split(" ")[1]
+        
+        user_id = get_user_id_from_token(token)
+        
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token: User ID not found")
+        
+        success = delete_question_by_id(db, question_id, user_id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Question not found")
+            
+        return {"message": "Question deleted successfully"}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting question: {str(e)}")
+
+

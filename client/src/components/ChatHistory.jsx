@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAuth } from "@/context/authContext"
-import { PlusCircle, Menu, LogOut, User } from 'lucide-react'
+import { PlusCircle, Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import {
     Sheet,
@@ -23,56 +23,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom';
 
-function ChatHistory({ onChatSelect, onNewChat, latestChat }) {
+function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, onDelete, fetchChatHistory }) {
     const { logout } = useAuth()
     const { toast } = useToast()
-    const [chatHistory, setChatHistory] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => {
-        const fetchChatHistory = async () => {
-            try {
-                const token = localStorage.getItem('token')
-                
-                if (!token) {
-                    console.error('No access token found')
-                    setIsLoading(false)
-                    return
-                }
-
-                const response = await fetch('http://127.0.0.1:8000/questions/history', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                
-                if (response.ok) {
-                    const data = await response.json()
-                    setChatHistory(Array.isArray(data) ? data : [])
-                } else {
-                    const errorData = await response.text()
-                    console.error('Error response:', errorData)
-                    setChatHistory([])
-                }
-            } catch (error) {
-                console.error('Error fetching chat history:', error)
-                setChatHistory([])
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        
         fetchChatHistory()
     }, [])
-
-    useEffect(() => {
-        if (latestChat && !chatHistory.find(chat => chat.id === latestChat.id)) {
-            setChatHistory(prev => [latestChat, ...prev])
-        }
-    }, [chatHistory, latestChat])
 
     const handleLogout = () => {
         try {
@@ -90,21 +50,53 @@ function ChatHistory({ onChatSelect, onNewChat, latestChat }) {
         }
     }
 
+    const handleDelete = async (chatId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://127.0.0.1:8000/questions/${chatId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                toast({
+                    title: "Chat deleted",
+                    description: "The chat has been deleted successfully",
+                });
+                await fetchChatHistory(); // Refresh the chat list
+                navigate('/chat');
+            } else {
+                throw new Error('Failed to delete chat');
+            }
+        } catch (error) {
+            console.error('Error deleting chat:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to delete the chat. Please try again.",
+            });
+        }
+    };
+
     const ChatHistoryContent = () => {
-        const { user, logout } = useAuth();
-        const { toast } = useToast();
-        
+        const { user } = useAuth();
+
         return (
-            <div className="flex flex-col h-full">
-                <div className="p-4 flex items-center justify-between">
-                    <h2 className="text-xl hidden md:block">Chat History</h2>
+            <div className="flex flex-col h-full ">
+                <div className="p-4 flex items-center justify-start">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Avatar className="cursor-pointer hover:opacity-80">
-                                <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
+                            <div className="flex items-center gap-2">
+                                <Avatar className="cursor-pointer hover:opacity-80 border-2 border-gray-600">
+                                    <AvatarFallback><User /></AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm text-muted-foreground">Dashboard</span>
+                            </div>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuContent align="start" className="w-56">
                             <DropdownMenuLabel>My Account</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="flex flex-col items-start gap-1">
@@ -112,7 +104,7 @@ function ChatHistory({ onChatSelect, onNewChat, latestChat }) {
                                 <div className="text-xs text-muted-foreground">{user.email}</div>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                                 className="text-red-600 focus:text-red-600 focus:bg-red-100"
                                 onClick={handleLogout}
                             >
@@ -135,23 +127,52 @@ function ChatHistory({ onChatSelect, onNewChat, latestChat }) {
                                 <p className="text-sm">Ask any question to get started</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 {chatHistory.map((chat) => (
                                     <Button
                                         key={chat.id}
                                         variant="ghost"
-                                        className="w-[80%] justify-between px-2 py-1 h-auto"
+                                        className="w-[83%] justify-between px-2 py-1 h-auto p-3 shadow-sm border rounded-lg"
                                         onClick={() => onChatSelect(chat)}
                                     >
                                         <span className="truncate mr-2 text-left">
                                             {chat.title}
                                         </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            {new Date(chat.created_at).toLocaleDateString("en-IN", {
-                                                day: "numeric",
-                                                month: "short",
-                                            })}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger>
+                                                    <Ellipsis className="h-4 w-4 text-gray-500" />
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuItem>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="gap-2 align-start w-full"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(chat.id);
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-red-500" /> 
+                                                            <span>Delete</span>
+                                                        </Button>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {new Date(chat.created_at).toLocaleDateString("en-IN", {
+                                                                day: "numeric",
+                                                                month: "short",
+                                                                year: "numeric",
+                                                                hour: "numeric",
+                                                                minute: "numeric",
+                                                            })}
+                                                        </span>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </Button>
                                 ))}
                             </div>
@@ -164,7 +185,7 @@ function ChatHistory({ onChatSelect, onNewChat, latestChat }) {
 
     return (
         <>
-            <div className="hidden md:block w-80 border-r-2 rounded-r-3xl border-gray-600 h-screen overflow-hidden">
+            <div className="hidden md:block w-80 border-r-2 border-t-2 border-b-2 rounded-r-3xl border-gray-600 h-screen overflow-hidden">
                 <ChatHistoryContent />
             </div>
             <div className="md:hidden">

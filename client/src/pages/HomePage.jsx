@@ -1,22 +1,75 @@
 import { useAuth } from "@/context/AuthContext"
 import ChatHistory from "@/components/ChatHistory"
 import ChatSection from "@/components/ChatSection"
-import { useState, useEffect } from "react"
 import Response from "@/components/Response"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 export default function HomePage() {
     const [selectedChat, setSelectedChat] = useState(null)
+    const [chatHistory, setChatHistory] = useState([])
     const [question, setQuestion] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const { toast } = useToast()
 
-    const handleNewChat = () => {
-        setSelectedChat(null)
+    const fetchChatHistory = async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const response = await fetch('http://127.0.0.1:8000/questions/history', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                setChatHistory(Array.isArray(data) ? data : [])
+            } else {
+                throw new Error('Failed to fetch chat history')
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error fetching chat history",
+                description: error.message || "Please try again later",
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleChatComplete = async (chatData) => {
-        setSelectedChat(chatData)
+    const handleDelete = async (chatId) => {
+        try {
+            const token = localStorage.getItem('token')
+            const response = await fetch(`http://127.0.0.1:8000/questions/${chatId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response.ok) {
+                toast({
+                    title: "Chat deleted",
+                    description: "The chat has been deleted successfully",
+                })
+                setSelectedChat(null)
+                await fetchChatHistory()
+            } else {
+                throw new Error('Failed to delete chat')
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error deleting chat",
+                description: error.message || "Please try again later",
+            })
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -37,13 +90,18 @@ export default function HomePage() {
 
             if (response.ok) {
                 const data = await response.json()
-                handleChatComplete(data)
+                setSelectedChat(data)
+                setChatHistory(prev => [data, ...prev])
                 setQuestion('')
             } else {
-                console.error('Failed to send question')
+                throw new Error('Failed to send question')
             }
         } catch (error) {
-            console.error('Error sending question:', error)
+            toast({
+                variant: "destructive",
+                title: "Error sending question",
+                description: error.message || "Please try again later",
+            })
         } finally {
             setIsSubmitting(false)
         }
@@ -52,9 +110,12 @@ export default function HomePage() {
     return (
         <div className="flex flex-col md:flex-row min-h-screen max-h-screen overflow-hidden">
             <ChatHistory 
+                chatHistory={chatHistory}
+                selectedChat={selectedChat}
                 onChatSelect={setSelectedChat}
-                onNewChat={handleNewChat}
-                latestChat={selectedChat}
+                isLoading={isLoading}
+                onDelete={handleDelete}
+                fetchChatHistory={fetchChatHistory}
             />
             <div className="flex-1 flex flex-col h-[calc(100vh-64px)] md:h-screen mt-16 md:mt-0">
                 <div className="flex-1 overflow-y-auto">

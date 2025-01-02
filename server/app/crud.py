@@ -59,3 +59,26 @@ def get_question_by_id(db: Session, question_id: str, user_id: str) -> QuestionA
         QuestionAnswer.id == question_id,
         QuestionAnswer.user_id == user_id
     ).first()
+
+def delete_question_answer(db: Session, question_id: str, user_id: str) -> None:
+    db.query(QuestionAnswer).filter(
+        QuestionAnswer.id == question_id,
+        QuestionAnswer.user_id == user_id
+    ).delete()
+    db.commit()
+
+def delete_question_by_id(db: Session, question_id: str, user_id: str) -> bool:
+    try:
+        question = db.query(QuestionAnswer).filter(
+            QuestionAnswer.id == question_id,
+            QuestionAnswer.user_id == user_id
+        ).first()
+        
+        if question:
+            db.delete(question)
+            db.commit()
+            return True
+        return False
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
