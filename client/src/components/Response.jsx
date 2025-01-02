@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Loader2, Trash2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import ReactMarkdown from 'react-markdown'
-import { Button } from "@/components/ui/button"
-import { useNavigate } from 'react-router-dom'
 
 function Response({ selectedChat }) {
+    const { toast } = useToast()
+
     if (!selectedChat) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -16,7 +16,7 @@ function Response({ selectedChat }) {
     }
 
     return (
-        <div className="flex flex-col h-full p-4">
+        <div className="flex flex-col h-full">
             <ScrollArea className="flex-1">
                 <div className="max-w-3xl mx-auto p-4 space-y-6">
                     <div className="space-y-2">
@@ -25,7 +25,6 @@ function Response({ selectedChat }) {
                             <p className="whitespace-pre-wrap text-foreground">{selectedChat.question}</p>
                         </div>
                     </div>
-
                     <div className="space-y-2">
                         <div className="text-sm font-medium text-foreground">Answer</div>
                         <div className="p-4 rounded-lg bg-muted border">
@@ -64,4 +63,3 @@ function Response({ selectedChat }) {
 }
 
 export default Response
-

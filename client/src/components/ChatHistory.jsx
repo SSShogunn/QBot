@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAuth } from "@/context/authContext"
-import { PlusCircle, Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
+import { Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import {
     Sheet,
@@ -22,13 +22,11 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useNavigate } from 'react-router-dom';
+} from "@/components/ui/dropdown-menu";
 
 function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, onDelete, fetchChatHistory }) {
     const { logout } = useAuth()
     const { toast } = useToast()
-    const navigate = useNavigate()
 
     useEffect(() => {
         fetchChatHistory()
@@ -66,8 +64,8 @@ function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, onDel
                     title: "Chat deleted",
                     description: "The chat has been deleted successfully",
                 });
-                await fetchChatHistory(); // Refresh the chat list
-                navigate('/chat');
+                await fetchChatHistory(); 
+                onChatSelect(null);
             } else {
                 throw new Error('Failed to delete chat');
             }
@@ -132,7 +130,7 @@ function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, onDel
                                     <Button
                                         key={chat.id}
                                         variant="ghost"
-                                        className="w-[83%] justify-between px-2 py-1 h-auto p-3 shadow-sm border rounded-lg"
+                                        className={`w-[83%] justify-between px-2 py-1 h-auto p-3 shadow-sm border rounded-lg ${selectedChat?.id === chat.id ? 'bg-gray-200' : ''}`}
                                         onClick={() => onChatSelect(chat)}
                                     >
                                         <span className="truncate mr-2 text-left">

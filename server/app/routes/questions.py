@@ -113,10 +113,6 @@ def get_question_history(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
 
-@router.get("/health")
-def health_check():
-    return {"status": "OK"}
-
 @router.get("/{question_id}", response_model=QuestionAnswerResponse)
 def get_question(
     question_id: str,
@@ -171,4 +167,7 @@ def delete_question(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting question: {str(e)}")
 
+@router.get("/health")
+def health_check():
+    return {"status": "OK"}
 

@@ -1,4 +1,3 @@
-import { useAuth } from "@/context/AuthContext"
 import ChatHistory from "@/components/ChatHistory"
 import ChatSection from "@/components/ChatSection"
 import Response from "@/components/Response"
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 export default function HomePage() {
     const [selectedChat, setSelectedChat] = useState(null)
@@ -139,7 +139,8 @@ export default function HomePage() {
                                 className="w-full"
                                 disabled={isSubmitting || !question.trim()}
                             >
-                                {isSubmitting ? 'Sending...' : 'Send Question'}
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                {isSubmitting ? 'Sending' : 'Send Question'}
                             </Button>
                         </div>
                     </form>
