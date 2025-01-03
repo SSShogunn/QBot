@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage'
 import LandingPage from './pages/LandingPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthenticationPage from './pages/AuthenticationPage'
+import NotFoundPage from './pages/NotFoundPage'
 import { Toaster } from "@/components/ui/toaster"
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <HomePage />
           </ProtectedRoute>
         } />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster />
     </>
