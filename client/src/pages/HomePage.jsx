@@ -7,7 +7,6 @@ import { useToast } from "../hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
 
 export default function HomePage() {
     const [selectedChat, setSelectedChat] = useState(null)
@@ -17,9 +16,8 @@ export default function HomePage() {
     const [isLoading, setIsLoading] = useState(true)
     const { toast } = useToast()
     const { logout } = useAuth()
-    const navigate = useNavigate()
 
-    const fetchChatHistory = async () => {
+    const fetchChatHistory = async (e) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -31,7 +29,8 @@ export default function HomePage() {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": "69420",
                 }
             });
 
@@ -42,8 +41,9 @@ export default function HomePage() {
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+            console.log(response.status)
             const data = await response.json();
-            console.log(data)
+            
             setChatHistory(data);
         } catch (error) {
             console.error('Error fetching chat history:', error);
