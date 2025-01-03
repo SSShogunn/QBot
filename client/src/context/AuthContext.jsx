@@ -7,19 +7,9 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
-    const checkTokenExpiration = () => {
+    const checkToken = () => {
         const token = localStorage.getItem('token');
-        const expiresTime = localStorage.getItem('expiresAt');
-        
-        if (!token || !expiresTime) {
-            logout();
-            return false;
-        }
-
-        const now = new Date();
-        const expirationDate = new Date(expiresTime);
-        
-        if (now >= expirationDate) {
+        if (!token) {
             logout();
             return false;
         }
@@ -31,7 +21,7 @@ export const AuthProvider = ({ children }) => {
         const userData = localStorage.getItem('user');
         
         if (token && userData) {
-            if (checkTokenExpiration()) {
+            if (checkToken()) {
                 setUser(JSON.parse(userData));
             } else {
                 logout();
@@ -44,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             if (user) {
-                checkTokenExpiration();
+                checkToken();
             }
         }, 60000); 
 
@@ -52,10 +42,9 @@ export const AuthProvider = ({ children }) => {
     }, [user]);
 
     const login = (userData) => {
-        const { name, email, token, expires_at } = userData;
+        const { name, email, token } = userData;
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify({ name, email }));
-        localStorage.setItem('expiresAt', expires_at);
         setUser({ name, email });
         navigate('/chat');
     };
@@ -63,7 +52,6 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('expiresAt');
         setUser(null);
         navigate('/');
     };
