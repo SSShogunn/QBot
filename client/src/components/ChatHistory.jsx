@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useAuth } from "../context/authContext"
+import { useAuth } from '@/context/AuthContext'
 import { Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
 import {
     Sheet,
