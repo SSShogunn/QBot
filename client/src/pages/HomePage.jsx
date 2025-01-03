@@ -18,7 +18,7 @@ export default function HomePage() {
     const fetchChatHistory = async () => {
         try {
             const token = localStorage.getItem('token')
-            const response = await fetch('http://127.0.0.1:8000/questions/history', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/history`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ export default function HomePage() {
     const handleDelete = async (chatId) => {
         try {
             const token = localStorage.getItem('token')
-            const response = await fetch(`http://127.0.0.1:8000/questions/${chatId}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/${chatId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -79,7 +79,7 @@ export default function HomePage() {
         setIsSubmitting(true)
         try {
             const token = localStorage.getItem('token')
-            const response = await fetch('http://127.0.0.1:8000/questions/ask', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/ask`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

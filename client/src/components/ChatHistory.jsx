@@ -3,7 +3,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAuth } from "@/context/authContext"
 import { Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
 import {
     Sheet,
     SheetContent,
@@ -50,7 +49,7 @@ function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, fetch
     const handleDelete = async (chatId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://127.0.0.1:8000/questions/${chatId}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/${chatId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

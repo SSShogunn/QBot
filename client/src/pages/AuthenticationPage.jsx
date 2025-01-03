@@ -28,8 +28,8 @@ function AuthenticationPage() {
         setError('')
         
         const endpoint = isLogin ? 
-            'http://127.0.0.1:8000/auth/login' : 
-            'http://127.0.0.1:8000/auth/register'
+            `${import.meta.env.VITE_BACKEND_URL}/auth/login` : 
+            `${import.meta.env.VITE_BACKEND_URL}/auth/register`
 
         try {
             const response = await fetch(endpoint, {
