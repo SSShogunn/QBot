@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
-        const currentPath = useLocation().pathname;
+        const currentPath = window.location.pathname;
         
         if (token && userData && checkToken()) {
             setUser(JSON.parse(userData));
