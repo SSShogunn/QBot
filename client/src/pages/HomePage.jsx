@@ -32,10 +32,18 @@ export default function HomePage() {
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    logout();
-                    throw new Error('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('expiresAt');
+                    window.location.href = '/auth';
+                    return;
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Response is not JSON");
             }
 
             const data = await response.json();
@@ -47,6 +55,9 @@ export default function HomePage() {
                 title: "Error",
                 description: error.message || "Failed to fetch chat history. Please try again.",
             });
+            if (error.message.includes('No authentication token found')) {
+                window.location.href = '/auth';
+            }
         } finally {
             setIsLoading(false);
         }

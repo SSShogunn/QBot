@@ -9,18 +9,22 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     const checkTokenExpiration = () => {
+        const token = localStorage.getItem('token');
         const expiresTime = localStorage.getItem('expiresAt');
-        if (expiresTime) {
-            const now = new Date();
-            const expirationDate = new Date(expiresTime);
-            
-            if (now >= expirationDate) {
-                logout();
-                return false;
-            }
-            return true;
+        
+        if (!token || !expiresTime) {
+            logout();
+            return false;
         }
-        return false;
+
+        const now = new Date();
+        const expirationDate = new Date(expiresTime);
+        
+        if (now >= expirationDate) {
+            logout();
+            return false;
+        }
+        return true;
     };
 
     useEffect(() => {
@@ -28,16 +32,14 @@ export const AuthProvider = ({ children }) => {
         const userData = localStorage.getItem('user');
         
         if (token && userData) {
-            // Check if token is expired
             if (checkTokenExpiration()) {
                 setIsAuthenticated(true);
                 setUser(JSON.parse(userData));
-                if (window.location.pathname === '/') {
-                    navigate('/chat');
-                }
             } else {
-                navigate('/');
+                logout();
             }
+        } else if (window.location.pathname !== '/' && window.location.pathname !== '/auth') {
+            navigate('/auth');
         }
     }, [navigate]);
 

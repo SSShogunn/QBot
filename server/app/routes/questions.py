@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from fastapi.responses import JSONResponse
 
 limiter = Limiter(key_func=get_remote_address)
 load_dotenv()
@@ -30,12 +31,22 @@ def get_user_id_from_token(token: str) -> str:
         if user_id is None:
             raise HTTPException(
                 status_code=401, 
-                detail="Invalid authentication credentials"
+                detail="Invalid token: missing user ID"
             )
         return user_id
-    except JWTError:
+    except jwt.ExpiredSignatureError:
         raise HTTPException(
-            status_code=401, 
+            status_code=401,
+            detail="Token has expired"
+        )
+    except jwt.JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token format"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=401,
             detail="Invalid authentication credentials"
         )
 
@@ -120,14 +131,27 @@ async def get_question_history(
 
         questions = get_user_questions(db, user_id)
         
-        # Set Cache-Control header
+        # Set additional headers
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        return questions
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        
+        return JSONResponse(
+            content=[question.dict() for question in questions],
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
 
     except HTTPException as he:
         raise he
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to fetch question history")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch question history"
+        )
 
 @router.delete("/{question_id}")
 async def delete_question(

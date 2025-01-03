@@ -12,12 +12,18 @@ load_dotenv()
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 
+# Update CORS settings to be more specific
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://q-bot-six.vercel.app",  # Add your production URL
+        "http://localhost:5173",         # Development URL
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
