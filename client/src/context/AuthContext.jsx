@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
-        const currentPath = window.location.pathname;
+        const currentPath = useLocation().pathname;
         
         if (token && userData && checkToken()) {
             setUser(JSON.parse(userData));
@@ -42,16 +42,6 @@ export const AuthProvider = ({ children }) => {
         
         setIsInitialized(true);
     }, [navigate]);
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            if (user && !checkToken()) {
-                logout();
-            }
-        }, 60000); 
-
-        return () => clearInterval(intervalId);
-    }, [user]);
 
     const login = (userData) => {
         const { name, email, token, expires_at } = userData;

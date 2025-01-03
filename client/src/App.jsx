@@ -13,9 +13,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<AuthenticationPage />} />
         <Route path="/chat" element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
+          <HomePage />
         } />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
