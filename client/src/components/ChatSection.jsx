@@ -3,7 +3,6 @@ import { Bot, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useToast } from "@/hooks/use-toast"
-import { useAuth } from '../context/AuthContext';
 
 function ChatSection({ selectedChat, onDelete }) {
     const navigate = useNavigate();

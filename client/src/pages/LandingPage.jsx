@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from 'react-router-dom'
 import { Bot, MessageSquare, Zap, Shield } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
 
 const LandingPage = () => {
     const navigate = useNavigate()
