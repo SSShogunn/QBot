@@ -16,31 +16,41 @@ export default function HomePage() {
     const { toast } = useToast()
 
     const fetchChatHistory = async () => {
+        setIsLoading(true);
         try {
-            const token = localStorage.getItem('token')
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/history`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
-            })
+            });
 
-            if (response.ok) {
-                const data = await response.json()
-                setChatHistory(Array.isArray(data) ? data : [])
-            } else {
-                throw new Error('Failed to fetch chat history')
+            if (!response.ok) {
+                if (response.status === 401) {
+                    logout();
+                    throw new Error('Session expired. Please log in again.');
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+            setChatHistory(data);
         } catch (error) {
+            console.error('Error fetching chat history:', error);
             toast({
                 variant: "destructive",
-                title: "Error fetching chat history",
-                description: error.message || "Please try again later",
-            })
+                title: "Error",
+                description: error.message || "Failed to fetch chat history. Please try again.",
+            });
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     const handleDelete = async (chatId) => {
         try {
