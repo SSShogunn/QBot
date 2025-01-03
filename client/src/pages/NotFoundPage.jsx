@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "../components/ui/button"
 import { useNavigate } from 'react-router-dom'
 import { Bot, Home } from 'lucide-react'
 

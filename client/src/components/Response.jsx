@@ -1,11 +1,11 @@
 import React from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "./ui/scroll-area";
 import { ClipboardList } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
 import ReactMarkdown from 'react-markdown';
 import copy from 'copy-to-clipboard';
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "../hooks/use-toast"
 
 const ResponseViewer = ({ selectedChat }) => {
     const { toast } = useToast()
@@ -43,11 +43,11 @@ const ResponseViewer = ({ selectedChat }) => {
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-xl font-semibold">Answer</CardTitle>
-                            <Button 
-                                onClick={handleCopy} 
-                                variant="outline" 
+                            <Button
+                                onClick={handleCopy}
+                                variant="outline"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="flex items-center justify-center w-8 h-8"
                             >
                                 <ClipboardList className="h-4 w-4" />
                             </Button>
@@ -62,7 +62,7 @@ const ResponseViewer = ({ selectedChat }) => {
                                             </div>
                                         ),
                                         code: ({ node, inline, ...props }) => (
-                                            inline ? 
+                                            inline ?
                                                 <code className="px-1 py-0.5 rounded-md bg-muted font-mono text-sm" {...props} /> :
                                                 <code className="block w-full" {...props} />
                                         ),

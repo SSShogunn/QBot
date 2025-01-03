@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useAuth } from '@/context/authContext'
+import { Button } from "../components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
+import { ScrollArea } from "../components/ui/scroll-area"
+import { useAuth } from '../context/AuthContext'
 import { Menu, LogOut, User, Loader2, Trash2, Ellipsis } from 'lucide-react'
 import {
     Sheet,
@@ -10,8 +10,8 @@ import {
     SheetHeader,
     SheetTitle,
     SheetDescription,
-} from "@/components/ui/sheet"
-import { useToast } from "@/hooks/use-toast"
+} from "../components/ui/sheet"
+import { useToast } from "../hooks/use-toast"
 import { useState, useEffect } from "react"
 import {
     DropdownMenu,
@@ -20,7 +20,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../components/ui/dropdown-menu";
 
 function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, fetchChatHistory }) {
     const { logout } = useAuth()
