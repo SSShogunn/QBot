@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Bot } from 'lucide-react'
 
 function AuthenticationPage() {
     const [isLogin, setIsLogin] = useState(true)
@@ -28,7 +32,6 @@ function AuthenticationPage() {
             'http://127.0.0.1:8000/auth/register'
 
         try {
-            console.log('Submitting form:', formData);
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -39,18 +42,12 @@ function AuthenticationPage() {
 
             const data = await response.json()
 
-            console.log('Response data:', data);
-
             if (!response.ok) {
                 throw new Error(data.detail || 'Authentication failed')
             }
 
             if (data.token) {
-                login({
-                    name: data.name,
-                    email: data.email,
-                    token: data.token
-                });
+                login(data);
             } else {
                 if (isLogin) {
                     throw new Error('No token received')
@@ -73,79 +70,91 @@ function AuthenticationPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    {isLogin ? 'Login' : 'Register'}
-                </h2>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+            <div className="flex items-center gap-2 mb-8">
+                <Bot className="h-6 w-6 text-primary" />
+                <span className="text-2xl font-bold">QBot</span>
+            </div>
+            
+            <Card className="w-full max-w-md">
+                <CardHeader className="space-y-1">
+                    <h2 className="text-2xl font-bold text-center">
+                        {isLogin ? 'Welcome back' : 'Create an account'}
+                    </h2>
+                    <p className="text-sm text-muted-foreground text-center">
+                        {isLogin 
+                            ? 'Enter your credentials to access your account' 
+                            : 'Enter your details to create your account'}
+                    </p>
+                </CardHeader>
                 
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
-                    </div>
-                )}
+                <CardContent>
+                    {error && (
+                        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg mb-4 text-sm">
+                            {error}
+                        </div>
+                    )}
 
-                <form onSubmit={handleSubmit}>
-                    {!isLogin && (
-                        <div className="mb-4">
-                            <label className="block mb-2">Username</label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {!isLogin && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Name</label>
+                                <Input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    placeholder="John Doe"
+                                    required
+                                />
+                            </div>
+                        )}
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Email</label>
+                            <Input
+                                type="email"
+                                name="email"
+                                value={formData.email}
                                 onChange={handleChange}
-                                className="w-full p-2 border rounded"
+                                placeholder="name@example.com"
                                 required
                             />
                         </div>
-                    )}
-                    
-                    <div className="mb-4">
-                        <label className="block mb-2">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded"
-                            required
-                        />
-                    </div>
-                    
-                    <div className="mb-6">
-                        <label className="block mb-2">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded"
-                            required
-                        />
-                    </div>
-                    
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                    >
-                        {isLogin ? 'Login' : 'Register'}
-                    </button>
-                </form>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Password</label>
+                            <Input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <Button type="submit" className="w-full">
+                            {isLogin ? 'Sign In' : 'Sign Up'}
+                        </Button>
+                    </form>
+                </CardContent>
                 
-                <p className="mt-4 text-center">
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
-                    <button
-                        onClick={() => {
-                            setIsLogin(!isLogin)
-                            setError('')
-                            setFormData({ name: '', email: '', password: '' })
-                        }}
-                        className="text-blue-500 hover:text-blue-600"
-                    >
-                        {isLogin ? 'Register' : 'Login'}
-                    </button>
-                </p>
-            </div>
+                <CardFooter>
+                    <p className="text-sm text-center w-full text-muted-foreground">
+                        {isLogin ? "Don't have an account? " : "Already have an account? "}
+                        <button
+                            onClick={() => {
+                                setIsLogin(!isLogin)
+                                setError('')
+                                setFormData({ name: '', email: '', password: '' })
+                            }}
+                            className="text-primary hover:underline font-medium"
+                        >
+                            {isLogin ? 'Sign Up' : 'Sign In'}
+                        </button>
+                    </p>
+                </CardFooter>
+            </Card>
         </div>
     )
 }

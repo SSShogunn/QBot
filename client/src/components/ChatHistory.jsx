@@ -11,7 +11,6 @@ import {
     SheetHeader,
     SheetTitle,
     SheetDescription,
-    SheetFooter
 } from "@/components/ui/sheet"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
@@ -24,7 +23,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, onDelete, fetchChatHistory }) {
+function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, fetchChatHistory }) {
     const { logout } = useAuth()
     const { toast } = useToast()
 

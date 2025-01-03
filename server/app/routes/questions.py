@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from app.database import get_db
@@ -8,7 +8,11 @@ from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
-from datetime import datetime
+import datetime
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 load_dotenv()
 
@@ -33,9 +37,6 @@ def get_user_id_from_token(token: str) -> str:
         raise HTTPException(status_code=401, detail="Could not validate token")
 
 def generate_title(question: str) -> str:
-    """
-    Generate a short title from the question using GPT-4
-    """
     try:
         title_response = client.chat.completions.create(
             model="gpt-4",
@@ -53,7 +54,9 @@ def generate_title(question: str) -> str:
         return question[:50] + "..." if len(question) > 50 else question
 
 @router.post("/ask", response_model=QuestionAnswerResponse)
-def ask_question(
+@limiter.limit("1/minute")
+async def ask_question(
+    request: Request,
     question_data: QuestionAnswerCreate,
     db: Session = Depends(get_db),
     authorization: str = Header(...),
@@ -68,9 +71,8 @@ def ask_question(
         raise HTTPException(status_code=401, detail="Invalid token: User ID not found")
     
     try:
-
         ai_response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an assistant that provides helpful answers. generate the answer in markdown format."},
                 {"role": "user", "content": question_data.question},
