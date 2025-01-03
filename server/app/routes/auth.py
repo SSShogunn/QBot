@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 
 router = APIRouter()
 
-# Token expiration time in minutes
-TOKEN_EXPIRATION = 60  # 1 hour
+
+TOKEN_EXPIRATION = 60  
 
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -31,7 +31,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         if not db_user or not verify_password(user.password, db_user.password):
             raise HTTPException(status_code=400, detail="Invalid credentials")
         
-        # Calculate expiration time
         expires_at = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRATION)
         
         token = create_access_token(
