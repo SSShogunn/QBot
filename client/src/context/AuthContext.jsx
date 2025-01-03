@@ -9,10 +9,10 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     const checkTokenExpiration = () => {
-        const expiresAt = localStorage.getItem('expiresAt');
-        if (expiresAt) {
+        const expiresTime = localStorage.getItem('expiresAt');
+        if (expiresTime) {
             const now = new Date();
-            const expirationDate = new Date(expiresAt);
+            const expirationDate = new Date(expiresTime);
             
             if (now >= expirationDate) {
                 logout();
