@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
@@ -33,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         
         if (token && userData) {
             if (checkTokenExpiration()) {
-                setIsAuthenticated(true);
                 setUser(JSON.parse(userData));
             } else {
                 logout();
@@ -45,13 +43,13 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if (isAuthenticated) {
+            if (user) {
                 checkTokenExpiration();
             }
         }, 60000); 
 
         return () => clearInterval(intervalId);
-    }, [isAuthenticated]);
+    }, [user]);
 
     const login = (userData) => {
         const { name, email, token, expires_at } = userData;
@@ -59,7 +57,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify({ name, email }));
         localStorage.setItem('expiresAt', expires_at);
         setUser({ name, email });
-        setIsAuthenticated(true);
         navigate('/chat');
     };
 
@@ -68,12 +65,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         localStorage.removeItem('expiresAt');
         setUser(null);
-        setIsAuthenticated(false);
         navigate('/');
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, user }}>
+        <AuthContext.Provider value={{ user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
