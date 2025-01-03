@@ -27,24 +27,26 @@ function ChatHistory({ chatHistory, selectedChat, onChatSelect, isLoading, fetch
     const { toast } = useToast()
 
     useEffect(() => {
-        fetchChatHistory()
-    }, [])
+        const fetchData = async () => {
+            try {
+                await fetchChatHistory();
+            } catch (error) {
+                if (error.message?.includes('authentication')) {
+                    handleLogout();
+                }
+            }
+        };
+        
+        fetchData();
+    }, []);
 
     const handleLogout = () => {
-        try {
-            logout()
-            toast({
-                title: "Logged out successfully",
-                description: "You have been logged out of your account",
-            })
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Error logging out",
-                description: "Please try again later",
-            })
-        }
-    }
+        logout();
+        toast({
+            title: "Session expired",
+            description: "Please log in again",
+        });
+    };
 
     const handleDelete = async (chatId) => {
         try {

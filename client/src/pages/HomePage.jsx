@@ -4,8 +4,10 @@ import Response from "../components/Response"
 import { Button } from "../components/ui/button"
 import { Textarea } from "../components/ui/textarea"
 import { useToast } from "../hooks/use-toast"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "../context/AuthContext"
+import { useNavigate } from "react-router-dom"
 
 export default function HomePage() {
     const [selectedChat, setSelectedChat] = useState(null)
@@ -14,6 +16,8 @@ export default function HomePage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const { toast } = useToast()
+    const { logout } = useAuth()
+    const navigate = useNavigate()
 
     const fetchChatHistory = async () => {
         setIsLoading(true);
@@ -24,6 +28,7 @@ export default function HomePage() {
             }
 
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/questions/history`, {
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -32,21 +37,13 @@ export default function HomePage() {
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('expiresAt');
-                    window.location.href = '/auth';
+                    logout();
                     return;
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("Response is not JSON");
-            }
-
             const data = await response.json();
+            console.log(data)
             setChatHistory(data);
         } catch (error) {
             console.error('Error fetching chat history:', error);
@@ -56,12 +53,16 @@ export default function HomePage() {
                 description: error.message || "Failed to fetch chat history. Please try again.",
             });
             if (error.message.includes('No authentication token found')) {
-                window.location.href = '/auth';
+                logout();
             }
         } finally {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchChatHistory();
+    }, []);
 
     const handleDelete = async (chatId) => {
         try {
@@ -74,16 +75,20 @@ export default function HomePage() {
                 }
             })
 
-            if (response.ok) {
-                toast({
-                    title: "Chat deleted",
-                    description: "The chat has been deleted successfully",
-                })
-                setSelectedChat(null)
-                await fetchChatHistory()
-            } else {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
                 throw new Error('Failed to delete chat')
             }
+
+            toast({
+                title: "Chat deleted",
+                description: "The chat has been deleted successfully",
+            })
+            setSelectedChat(null)
+            await fetchChatHistory()
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -109,14 +114,18 @@ export default function HomePage() {
                 body: JSON.stringify({ question })
             })
 
-            if (response.ok) {
-                const data = await response.json()
-                setSelectedChat(data)
-                setChatHistory(prev => [data, ...prev])
-                setQuestion('')
-            } else {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
                 throw new Error('Failed to send question')
             }
+
+            const data = await response.json()
+            setSelectedChat(data)
+            setChatHistory(prev => [data, ...prev])
+            setQuestion('')
         } catch (error) {
             toast({
                 variant: "destructive",
