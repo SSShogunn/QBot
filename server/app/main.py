@@ -1,9 +1,13 @@
 from fastapi import FastAPI, Request
 from app.routes import auth, questions
-from fastapi.middleware.cors import CORSMiddleware                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -12,8 +16,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"], 
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
